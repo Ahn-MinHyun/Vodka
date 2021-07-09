@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
 import sys
-sys.path.insert(0, '/Users/mac/Desktop/Django/Vodka/tourists/db')
+sys.path.insert(0, 'tourists/db')
 # 1. DB커넥션 가져오기 
 from db import get_mysql_connection
 connection = get_mysql_connection()

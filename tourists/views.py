@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from datetime import datetime
 
 import sys
-sys.path.insert(0, '/Users/mac/Desktop/Django/Vodka/tourists/resources')
+sys.path.insert(0, 'tourists/resources')
 from data import records
 
 

@@ -1,7 +1,7 @@
 import mysql.connector
 from mysql.connector import Error
 import sys
-sys.path.insert(0, '/Users/mac/Desktop/Django/Vodka/tourists/config')
+sys.path.insert(0, 'tourists/config')
 from config import db_config
 
 def get_mysql_connection():
