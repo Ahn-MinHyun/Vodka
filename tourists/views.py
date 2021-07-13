@@ -2,7 +2,7 @@ from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 from django.http import HttpResponse
 from datetime import datetime
-
+from django.utils import timezone
 import sys
 sys.path.insert(0, 'tourists/resources')
 from data import records
@@ -86,34 +86,6 @@ for k,n in records[0].items():
         citymap[k]['desc'] = desc
 
 
-    
-
-
-    # data = {
-    #     'population': n,
-    #     'desc': desc
-    # }
-
-    # citymap[k] = data
-
-    # context[k] = data
-
-print(context)
-    
-    # if 'area' in k:
-    #     context[(k+'_num')] = n
-    #     if n >= 80 :
-    #         context[k] = '혼잡'
-    #     elif 30<= n < 80:
-    #         context[k] = '보통'
-    #     else:
-    #         context[k] = '여유'
-    # else:
-    #     context[k]=n
-
-
-
-
 locations= [
     {
         'center': { 'lat': 37.392476, 'lng': 126.639928 },
@@ -144,18 +116,14 @@ locations= [
 
 # Create your views here.
 def index(request):
-    today = datetime.now().strftime(" %Y 년 %m 월 %d 일 %I:%M:%S%p")
+    today = timezone.now().strftime(" %Y 년 %m 월 %d 일 %I:%M:%S%p")
     context['today']= today
     # context['locations']= json.dumps(locations)
     context['citymapJson']= json.dumps(citymap)
     
-    print(context)
     return render(request, 'index.html', context=context) 
 
 def button(request):
     context  = { }
     return render(request, 'buttons.html', context)
 
-def cards(request):
-    context  = { }
-    return render(request, 'cards.html', context) 
