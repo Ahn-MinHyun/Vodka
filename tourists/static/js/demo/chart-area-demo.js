@@ -34,7 +34,7 @@ var myLineChart = new Chart(ctx, {
   data: {
     labels: ["SUN", "MON", "TUE", "WEN", "THU", "FRI", "SAT"],
     datasets: [{
-      label: "Earnings",
+      label: "관광객",
       lineTension: 0.3,
       backgroundColor: "rgba(78, 115, 223, 0.05)",
       borderColor: "rgba(78, 115, 223, 1)",
@@ -46,7 +46,7 @@ var myLineChart = new Chart(ctx, {
       pointHoverBorderColor: "rgba(78, 115, 223, 1)",
       pointHitRadius: 10,
       pointBorderWidth: 2,
-      data: [5000, 1000, 1500, 1000, 2000, 3000, 5000],
+      data: [2000, 1000, 1500, 1000, 2000, 3000, 3000],
     }],
   },
   options: {
@@ -78,7 +78,7 @@ var myLineChart = new Chart(ctx, {
           padding: 10,
           // Include a dollar sign in the ticks
           callback: function(value, index, values) {
-            return '명' + number_format(value);
+            return  number_format(value)+'명';
           }
         },
         gridLines: {

@@ -22,6 +22,12 @@
     <!-- Custom styles for this template-->
     <link href='{% static "css/sb-admin-2.min.css" %}' rel="stylesheet">
 
+    <!-- 구글API -->
+    <title>Circles</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+    <link rel="stylesheet" type="text/css" href='{% static "css/style.css" %}' />
+    <script src='{% static "js/index.js"%}'></script>
+
 </head>
 
 <body id="page-top">
@@ -458,7 +464,7 @@
                         </div>
                     </div>
 
-                    <!--카카오 API-->
+                    <!--구글 API-->
                         <!--지도 그리기-->
                         <div class="col-xl-10 col-xl-9">
                             <!-- 카드 머리-->
@@ -483,88 +489,68 @@
                                 <div
                                 class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                     <!--크기 지정-->
+                                    
                                     <div id="map" style="width:700px;height:400px;">
                                         <!--API키 -->
-                                        <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=5ed80b2f2fe09f0e8f0b5dd724657a4a"></script>
+                                        <!-- <div id="map" style="width:100%; height: 100vh;"></div> -->
+                                        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDAFm-NPaHWvIWHRk11H23Vxun6iCBsNnY&callback=initMap&region=kr"></script>
                                         <script>
-                                            //중심 좌표지정
-                                            var container = document.getElementById('map');
-                                            var options = {
-                                                center: new kakao.maps.LatLng(37.39258, 126.64000),
-                                                level: 4
-                                            };
-                                            
-                                            // 마커를 표시할 위치입니다 
-                                            var positions = [
-                                                {
-                                                    content: '<div class="font-weight-bold">꽃사슴정원 <strong class="text-success">{{area1}}</strong></div>',
-                                            
-                                                    latlng: new kakao.maps.LatLng(37.392476, 126.639928)
-                                                },
-                                                {
-                                                    content: '<div class="font-weight-bold">중앙 다리 <strong class="text-success">{{area2}}</strong></div>', 
-                                                    latlng: new kakao.maps.LatLng(37.39258, 126.63848)
-                                                },
-                                                {
-                                                    content: '<div class="font-weight-bold">잔디 광장 <strong class="text-success">{{area3}}</strong></div>', 
-                                                    latlng: new kakao.maps.LatLng(37.394135, 126.638070)
-                                                },
-                                                {
-                                                    content: '<div class="font-weight-bold">' +
-                                                                '    <span class="title">테라스 정원 <strong class="text-success">{{area4}}</strong></span>' +
-                                                                '</div>',
-                                                    latlng: new kakao.maps.LatLng(37.390063, 126.640868)
-                                                },
-                                                {
-                                                    content: '<div class="font-weight-bold ">이스트 보트하우스 <strong class="text-success">{{area5}}</strong></div>', 
-                                                    latlng: new kakao.maps.LatLng(37.390274, 126.643637)
-                                                },
-                                            ];                                         
-                         
-                                            // 지도 생성
-                                            var map = new kakao.maps.Map(container, options);
-                                            
 
-                                            for (var i = 0; i < positions.length; i ++) {
 
-                                                // 마커를 생성합니다
-                                                var marker = new kakao.maps.Marker({
-                                                    map: map, // 마커를 표시할 지도
-                                                    position: positions[i].latlng, // 마커의 위치
-                                                    // image : markerImage
-                                                });
-                                                
-                                                // 마커에 표시할 인포윈도우를 생성합니다 
-                                                var infowindow = new kakao.maps.InfoWindow({
-                                                    content: positions[i].content // 인포윈도우에 표시할 내용
+                                          function initMap() {
+                                            
+                                            let citymap = JSON.parse("{{ citymapJson | escapejs }}")
+
+                                            var songdo = { lat: 37.39198 ,lng: 126.639000 };
+                                            var map = new google.maps.Map(
+                                              document.getElementById('map'), {
+                                                zoom: 16,
+                                                center: songdo
+                                              });
+                                            // Construct the circle for each value in citymap.
+                                            // Note: We scale the area of the circle based on the population.
+
+                                            for (const city in citymap) {
+                                                // Add the circle for this city to the map.
+                                                const cityCircle = new google.maps.Circle({
+                                                    strokeColor: "#FF0000",
+                                                    strokeOpacity: 0.8,
+                                                    strokeWeight: 2,
+                                                    fillColor: "#FF0000",
+                                                    fillOpacity: 0.35,
+                                                    map,
+                                                    center: citymap[city].center,
+                                                    // 원의 크기를 지정할 곳  (인구 밀집도 계산)
+                                                    radius: (citymap[city].population)*1,
                                                 });
 
-                                                // 마커에 mouseover 이벤트와 mouseout 이벤트를 등록합니다
-                                                // 이벤트 리스너로는 클로저를 만들어 등록합니다 
-                                                // for문에서 클로저를 만들어 주지 않으면 마지막 마커에만 이벤트가 등록됩니다
-                                                kakao.maps.event.addListener(marker, 'mouseover', makeOverListener(map, marker, infowindow));
-                                                kakao.maps.event.addListener(marker, 'mouseout', makeOutListener(infowindow));
-                                            }
+                                                const contentString = '<div class="font-weight-bold">'+ citymap[city].name +'<br> <strong class="text-success">'+citymap[city].desc+'</strong></div>'; 
 
-                                            // 인포윈도우를 표시하는 클로저를 만드는 함수입니다 
-                                            function makeOverListener(map, marker, infowindow) {
-                                                return function() {
-                                                    infowindow.open(map, marker);
-                                                };
-                                            }
+                                                const infowindow = new google.maps.InfoWindow({
+                                                    content: contentString,
+                                                });
+                                                const marker = new google.maps.Marker({
+                                                    position: citymap[city].center,
+                                                    map,
+                                                    title: "Hello World!",
+                                                });
+                                                marker.addListener("mouseover", () => {
+                                                    infowindow.open({
+                                                    anchor: marker,
+                                                    map,
+                                                    shouldFocus: false,
+                                                    });
+                                                });
+                                                marker.addListener("mouseout", () => {
+                                                    infowindow.close({
+                                                    anchor: marker,
+                                                    map,
+                                                    shouldFocus: false,
+                                                    });
+                                                });                                                
+                                            }                                            
+                                          }
 
-                                            // 인포윈도우를 닫는 클로저를 만드는 함수입니다 
-                                            function makeOutListener(infowindow) {
-                                                return function() {
-                                                    infowindow.close();
-                                                };
-                                            }
-                                            // 일반 지도와 스카이뷰로 지도 타입을 전환할 수 있는 지도타입 컨트롤을 생성합니다
-                                            // 지도에 컨트롤을 추가해야 지도위에 표시됩니다
-                                            // kakao.maps.ControlPosition은 컨트롤이 표시될 위치를 정의하는데 TOPRIGHT는 오른쪽 위를 의미합니다
-                                            var mapTypeControl = new kakao.maps.MapTypeControl();
-                                            map.addControl(mapTypeControl, kakao.maps.ControlPosition.TOPRIGHT);
-                    
 
                                         </script>
                                     </div>    
@@ -600,8 +586,7 @@
                             </div>
                             
                         </div>
-
-
+                      
                     <!-- Content Row -->
                     <div class="row">
 
@@ -611,163 +596,51 @@
                             <!-- Project Card Example -->
                             <div class="card shadow mb-4">
                                 <div class="card-header py-3">
-                                    <h6 class="m-0 font-weight-bold text-primary">Projects</h6>
+                                    <h6 class="m-0 font-weight-bold text-primary">인구 혼잡률 </h6>
                                 </div>
                                 <div class="card-body">
-                                    <h4 class="small font-weight-bold">Server Migration <span
-                                            class="float-right">50%</span></h4>
+                                    <h4 class="small font-weight-bold">꽃사슴 정원<span
+                                            class="float-right">{{area1_num}}%</span></h4>
                                     <div class="progress mb-4">
-                                        <div class="progress-bar bg-danger" role="progressbar" style="width: 50%"
+                                        <div class="progress-bar bg-danger" role="progressbar" style="width: {{area1_num}}%"
                                             aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>
-                                    <h4 class="small font-weight-bold">Sales Tracking <span
-                                            class="float-right">40%</span></h4>
+                                    <h4 class="small font-weight-bold">중앙 다리 <span
+                                            class="float-right">{{area2_num}}%</span></h4>
                                     <div class="progress mb-4">
-                                        <div class="progress-bar bg-warning" role="progressbar" style="width: 40%"
+                                        <div class="progress-bar bg-warning" role="progressbar" style="width: {{area2_num}}%"
+                                            aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                    <h4 class="small font-weight-bold">잔디 광장 <span
+                                            class="float-right">{{area3_num}}%</span></h4>
+                                    <div class="progress mb-4">
+                                        <div class="progress-bar" role="progressbar" style="width:{{area3_num}}%"
                                             aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>
-                                    <h4 class="small font-weight-bold">Customer Database <span
-                                            class="float-right">60%</span></h4>
+                                    <h4 class="small font-weight-bold">테라스 정원 <span
+                                            class="float-right">{{area4_num}}%</span></h4>
                                     <div class="progress mb-4">
-                                        <div class="progress-bar" role="progressbar" style="width: 60%"
-                                            aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                    <h4 class="small font-weight-bold">Payout Details <span
-                                            class="float-right">80%</span></h4>
-                                    <div class="progress mb-4">
-                                        <div class="progress-bar bg-info" role="progressbar" style="width: 80"
+                                        <div class="progress-bar bg-info" role="progressbar" style="width: {{area4_num}}%"
                                             aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>
-                                    <h4 class="small font-weight-bold">Account Setup <span
-                                            class="float-right">Complete!</span></h4>
+                                    <h4 class="small font-weight-bold">이스트보트 하우스 <span
+                                            class="float-right">{{area5_num}}%</span></h4>
                                     <div class="progress">
-                                        <div class="progress-bar bg-success" role="progressbar" style="width: 100%"
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: {{area5_num}}%"
                                             aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Color System -->
-                            <div class="row">
-                                <div class="col-lg-6 mb-4">
-                                    <div class="card bg-primary text-white shadow">
-                                        <div class="card-body">
-                                            Primary
-                                            <div class="text-white-50 small">#4e73df</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 mb-4">
-                                    <div class="card bg-success text-white shadow">
-                                        <div class="card-body">
-                                            Success
-                                            <div class="text-white-50 small">#1cc88a</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 mb-4">
-                                    <div class="card bg-info text-white shadow">
-                                        <div class="card-body">
-                                            Info
-                                            <div class="text-white-50 small">#36b9cc</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 mb-4">
-                                    <div class="card bg-warning text-white shadow">
-                                        <div class="card-body">
-                                            Warning
-                                            <div class="text-white-50 small">#f6c23e</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 mb-4">
-                                    <div class="card bg-danger text-white shadow">
-                                        <div class="card-body">
-                                            Danger
-                                            <div class="text-white-50 small">#e74a3b</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 mb-4">
-                                    <div class="card bg-secondary text-white shadow">
-                                        <div class="card-body">
-                                            Secondary
-                                            <div class="text-white-50 small">#858796</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 mb-4">
-                                    <div class="card bg-light text-black shadow">
-                                        <div class="card-body">
-                                            Light
-                                            <div class="text-black-50 small">#f8f9fc</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-6 mb-4">
-                                    <div class="card bg-dark text-white shadow">
-                                        <div class="card-body">
-                                            Dark
-                                            <div class="text-white-50 small">#5a5c69</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            
 
                         </div>
-
-                        <div class="col-lg-6 mb-4">
-
-                            <!-- Illustrations -->
-                            <div class="card shadow mb-4">
-                                <div class="card-header py-3">
-                                    <h6 class="m-0 font-weight-bold text-primary">Illustrations</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="text-center">
-                                        <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="width: 25rem;"
-                                            src='{% static "img/undraw_posting_photo.svg" %}' alt="...">
-                                    </div>
-                                    <p>Add some quality, svg illustrations to your project courtesy of <a
-                                            target="_blank" rel="nofollow" href="https://undraw.co/">unDraw</a>, a
-                                        constantly updated collection of beautiful svg images that you can use
-                                        completely free and without attribution!</p>
-                                    <a target="_blank" rel="nofollow" href="https://undraw.co/">Browse Illustrations on
-                                        unDraw &rarr;</a>
-                                </div>
-                            </div>
-
-                            <!-- Approach -->
-                            <div class="card shadow mb-4">
-                                <div class="card-header py-3">
-                                    <h6 class="m-0 font-weight-bold text-primary">Development Approach</h6>
-                                </div>
-                                <div class="card-body">
-                                    <p>SB Admin 2 makes extensive use of Bootstrap 4 utility classes in order to reduce
-                                        CSS bloat and poor page performance. Custom CSS classes are used to create
-                                        custom components and custom utility classes.</p>
-                                    <p class="mb-0">Before working with this theme, you should become familiar with the
-                                        Bootstrap framework, especially the utility classes.</p>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                </div>
-                <!-- /.container-fluid -->
-                    <!-- Content Row -->
-
-                    <div class="row">
-
                         <!-- Area Chart -->
-                        <div class="col-xl-8 col-lg-7">
+                        <div class="col-lg-4 mb-4">                          
                             <div class="card shadow mb-4">
-                                <!-- Card Header - Dropdown -->
                                 <div
                                     class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                    <h6 class="m-0 font-weight-bold text-primary">Earnings Overview</h6>
+                                    <h6 class="m-0 font-weight-bold text-primary"> 요일별 밀집도 </h6>
                                     <div class="dropdown no-arrow">
                                         <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
                                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -789,52 +662,45 @@
                                         <canvas id="myAreaChart"></canvas>
                                     </div>
                                 </div>
+                                
                             </div>
-                        </div>
 
-                        <!-- Pie Chart -->
-                        <div class="col-xl-4 col-lg-5">
+                            <!-- Approach -->
+                            
+
+
+                </div>
+                <!-- /.container-fluid -->
+                    <!-- Content Row -->
+
+                    <div class="row">
+
+                        <div class="col-xl-6 col-lg-5">
                             <div class="card shadow mb-4">
                                 <!-- Card Header - Dropdown -->
-                                <div
-                                    class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                    <h6 class="m-0 font-weight-bold text-primary">Revenue Sources</h6>
-                                    <div class="dropdown no-arrow">
-                                        <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-                                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                                        </a>
-                                        <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-                                            aria-labelledby="dropdownMenuLink">
-                                            <div class="dropdown-header">Dropdown Header:</div>
-                                            <a class="dropdown-item" href="#">Action</a>
-                                            <a class="dropdown-item" href="#">Another action</a>
-                                            <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item" href="#">Something else here</a>
-                                        </div>
-                                    </div>
+                                <div class="card-header py-3">
+                                    
+                                    <h6 class="m-0 font-weight-bold text-primary">Illustrations</h6>
                                 </div>
+                                
                                 <!-- Card Body -->
                                 <div class="card-body">
-                                    <div class="chart-pie pt-4 pb-2">
-                                        <canvas id="myPieChart"></canvas>
+                                    <div class="text-center">
+                                        <img class="img-fluid px-3 px-sm-4 mt-3 mb-4" style="width: 25rem;"
+                                            src='{% static "img/undraw_posting_photo.svg" %}' alt="...">
                                     </div>
-                                    <div class="mt-4 text-center small">
-                                        <span class="mr-2">
-                                            <i class="fas fa-circle text-primary"></i> 혼잡
-                                        </span>
-                                        <span class="mr-2">
-                                            <i class="fas fa-circle text-success"></i> 한가
-                                        </span>
-                                        <span class="mr-2">
-                                            <i class="fas fa-circle text-info"></i> ..
-                                        </span>
-                                    </div>
+                                    <p>Add some quality, svg illustrations to your project courtesy of <a
+                                            target="_blank" rel="nofollow" href="https://undraw.co/">unDraw</a>, a
+                                        constantly updated collection of beautiful svg images that you can use
+                                        completely free and without attribution!</p>
+                                    <a target="_blank" rel="nofollow" href="https://undraw.co/">Browse Illustrations on
+                                        unDraw &rarr;</a>
                                 </div>
                             </div>
                         </div>
+                        
                     </div>
-            </div>
+            
             <!-- End of Main Content -->
 
             <!-- Footer -->
