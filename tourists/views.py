@@ -63,9 +63,13 @@ def records_update():
             elif 30<= n < 80:
                 context[k] = '보통'
                 desc = '보통'
+            else:
+                context[k] = '여유'
+
             if k in citymap.keys():
                 citymap[k]['population'] = n 
                 citymap[k]['desc'] = desc
+    print(context)
 
     Timer(300, records_update).start()
 
